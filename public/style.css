@@ -41,7 +41,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(5, 5, 5, 0.78);
+  background: rgba(5, 5, 5, 0.55);
   transition: background 1.2s ease;
 }
 /* When recording: reveal the background more dramatically */
@@ -49,7 +49,7 @@ body {
   animation: bg-pulse 3s infinite alternate ease-in-out;
 }
 #dynamic-bg.active-recording::after {
-  background: rgba(5, 5, 5, 0.55);
+  background: rgba(5, 5, 5, 0.30);
 }
 @keyframes bg-breathe {
   0%   { transform: scale(1)    translateY(0px); }
@@ -63,9 +63,9 @@ body {
 /* ---------- topbar ---------- */
 .topbar {
   display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
-  padding: 20px 32px; border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; background: rgba(5, 5, 5, 0.6);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  padding: 20px 32px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky; top: 0; background: rgba(5, 5, 5, 0.4);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   z-index: 10;
 }
 .brand { display: flex; align-items: center; margin-right: auto; }
@@ -80,7 +80,7 @@ body {
 
 /* ---------- layout ---------- */
 main { max-width: 1080px; margin: 32px auto 80px; padding: 0 24px; display: flex; flex-direction: column; gap: 24px; }
-.card { background: rgba(14, 14, 16, 0.6); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 28px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.card { background: rgba(14, 14, 16, 0.35); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 28px; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 .card-head h2 { font-size: 16px; font-weight: 500; letter-spacing: -0.3px; }
 .card-head .count { color: var(--muted); font-size: 13px; margin-left: 8px; font-weight: 400; }

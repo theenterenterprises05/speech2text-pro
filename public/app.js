@@ -545,6 +545,18 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeEdit(
 window.addEventListener('beforeunload', stopSTT);
 
 /* ---------------- init ---------------- */
+async function fetchHealth(retries = 3, delayMs = 1500) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const h = await api('/api/health');
+      return h;
+    } catch {
+      if (i < retries - 1) await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+    }
+  }
+  return null;
+}
+
 (async function init() {
   if (SpeechRecognition) els.engineStatus.textContent = 'Engine: Web Speech';
   else els.engineStatus.textContent = 'Engine: Unsupported';
@@ -554,12 +566,15 @@ window.addEventListener('beforeunload', stopSTT);
   animate(".topbar", { opacity: [0, 1], y: [-20, 0] }, { duration: 0.6, easing: spring() });
   animate(".card", { opacity: [0, 1], y: [20, 0] }, { delay: stagger(0.1), duration: 0.6, easing: spring() });
 
-  try {
-    const h = await api('/api/health');
+  const h = await fetchHealth(4, 1000);
+  if (h) {
     state.health = h;
     state.geminiOn = !!h.gemini;
-    els.engineStatus.textContent = `Engine: ${h.db === 'postgres' ? 'Postgres' : 'Memory'}${h.gemini ? ' + Gemini' : ''}`;
-  } catch { /* non-fatal */ }
+    els.engineStatus.textContent = `Engine: ${h.db === 'postgres' ? 'Postgres' : 'Memory'}${h.gemini ? ' + Gemini AI' : ''}`;
+    if (h.gemini) {
+      els.aiBtn.title = 'AI Transcribe via Gemini (enabled)';
+    }
+  }
 
   loadStats();
   loadList();
