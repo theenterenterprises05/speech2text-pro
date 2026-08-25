@@ -1,4 +1,5 @@
-import { animate, spring, stagger } from "https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm";
+import { animate, stagger } from "https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm";
+const springEase = [0.16, 1, 0.3, 1]; // spring-like cubic-bezier
 
 /* ============ Speech2Text Pro — frontend ============
  * STT  : Web Speech API (client-side, free, multilingual, real-time)
@@ -473,7 +474,7 @@ function openEdit(t) {
   els.editText.value = t.text;
   els.modalBackdrop.classList.remove('hidden');
   animate(els.modalBackdrop, { opacity: [0, 1] }, { duration: 0.2 });
-  animate(".modal", { scale: [0.95, 1], opacity: [0, 1], y: [10, 0] }, { duration: 0.3, easing: spring() });
+  animate(".modal", { scale: [0.95, 1], opacity: [0, 1], y: [10, 0] }, { duration: 0.3, easing: springEase });
   els.editText.focus();
 }
 function closeEdit() {
@@ -563,8 +564,8 @@ async function fetchHealth(retries = 3, delayMs = 1500) {
   if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
 
   // Initial page load animations
-  animate(".topbar", { opacity: [0, 1], y: [-20, 0] }, { duration: 0.6, easing: spring() });
-  animate(".card", { opacity: [0, 1], y: [20, 0] }, { delay: stagger(0.1), duration: 0.6, easing: spring() });
+  animate(".topbar", { opacity: [0, 1], y: [-20, 0] }, { duration: 0.6, easing: springEase });
+  animate(".card", { opacity: [0, 1], y: [20, 0] }, { delay: stagger(0.1), duration: 0.6, easing: springEase });
 
   const h = await fetchHealth(4, 1000);
   if (h) {
