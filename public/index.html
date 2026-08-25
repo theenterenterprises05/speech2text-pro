@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speech2Text Pro — Real-time Multilingual Transcription</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🎙️</span>
+      <div>
+        <h1>Speech<span class="grad">2</span>Text <span class="pro">PRO</span></h1>
+        <p>Real-time multilingual transcription · English · हिन्दी · Hinglish</p>
+      </div>
+    </div>
+    <div class="stat-chips" id="statChips"></div>
+    <div class="status-pill" id="engineStatus">Engine: …</div>
+  </header>
+
+  <main>
+    <!-- Live transcription -->
+    <section class="card live">
+      <div class="card-head">
+        <h2>Live Transcription</h2>
+        <div class="live-meta">
+          <span class="badge idle" id="liveBadge">Idle</span>
+          <span class="timer" id="timer">00:00</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label class="field">
+          Language
+          <select id="langSelect">
+            <option value="hi-IN">हिन्दी + English (Hinglish) — recommended</option>
+            <option value="en-IN">English (India)</option>
+            <option value="en-US">English (US)</option>
+          </select>
+        </label>
+        <label class="field">
+          TTS Voice
+          <select id="voiceSelect"><option value="">Auto (script-aware)</option></select>
+        </label>
+        <button id="micBtn" class="btn mic">🎤 Start Speaking</button>
+        <button id="aiBtn" class="btn ai">✨ AI Transcribe</button>
+        <button id="speakBtn" class="btn ghost">🔊 Listen</button>
+        <button id="copyBtn" class="btn ghost">📋 Copy</button>
+        <button id="saveBtn" class="btn primary" disabled>💾 Save</button>
+        <button id="clearBtn" class="btn ghost">🗑 Clear</button>
+      </div>
+
+      <div class="transcript-box">
+        <canvas id="waveform" width="1000" height="72"></canvas>
+        <p class="placeholder" id="placeholder">
+          Press <b>Start Speaking</b> and talk — words appear here in real time.<br />
+          Try mixing Hindi and English: <i>“mera naam Ayush hai, I am a software developer”</i>
+        </p>
+        <p class="transcript final" id="finalText"></p>
+        <p class="transcript interim" id="interimText"></p>
+      </div>
+
+      <div class="live-footer">
+        <span class="hint">🛡️ Mic needs <b>HTTPS</b> (or localhost). Web Speech API runs in your browser — no audio leaves your device; the optional ✨ AI Transcribe sends a short recording to Gemini only if you set an API key.</span>
+        <span class="lang-detect" id="langDetect"></span>
+      </div>
+    </section>
+
+    <!-- History dashboard -->
+    <section class="card history">
+      <div class="card-head">
+        <h2>Transcription History <span class="count" id="countPill"></span></h2>
+        <div>
+          <button id="exportBtn" class="btn ghost">⬇ Export TXT</button>
+          <button id="refreshBtn" class="btn ghost">↻ Refresh</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search transcriptions…" autocomplete="off" />
+        <select id="langFilter">
+          <option value="">All languages</option>
+          <option value="hinglish">Hinglish</option>
+          <option value="hindi">हिन्दी</option>
+          <option value="english">English</option>
+          <option value="auto">Auto</option>
+        </select>
+        <button id="clearAllBtn" class="btn danger">Delete All</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Text</th><th>Lang</th><th>Words</th><th>Recorded</th><th class="actions-col">Actions</th></tr>
+          </thead>
+          <tbody id="historyBody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Edit modal -->
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <div class="modal">
+      <h3>✏️ Edit transcription</h3>
+      <textarea id="editText" rows="4" placeholder="Transcription text…"></textarea>
+      <div class="modal-actions">
+        <button class="btn ghost" id="cancelEditBtn">Cancel</button>
+        <button class="btn primary" id="saveEditBtn">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# render.yaml — One-click Render deployment for Speech2Text Pro
+# docs: https://render.com/docs/blueprint-spec
+#
+# Usage:
+#   1. Push this repo to GitHub
+#   2. Go to https://dashboard.render.com → New → Blueprint
+#   3. Connect your repo — Render reads this file and auto-creates both services
+#   4. Set GEMINI_API_KEY (optional) in the web service environment
+
+services:
+  # ── Web service (Node.js app) ─────────────────────────────────────────────
+  - type: web
+    name: speech2text-pro
+    runtime: node
+    plan: free
+    region: singapore  # change to oregon / frankfurt if preferred
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: speech2text-db
+          property: connectionString
+      # Optional — set in Render dashboard for AI transcription
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+
+  # ── PostgreSQL 16 database ────────────────────────────────────────────────
+databases:
+  - name: speech2text-db
+    plan: free
+    databaseName: speech2text
+    user: speech2text_user
+    region: singapore

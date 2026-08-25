@@ -1,0 +1,31 @@
+{
+  "name": "speech2text-pro",
+  "version": "2.0.0",
+  "description": "Real-time multilingual (Hindi + English / Hinglish) speech-to-text web app with CRUD history dashboard — Procucev AI Tech Hiring Assignment",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node scripts/seed.js",
+    "test": "node tests/smoke.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "speech-to-text",
+    "transcription",
+    "multilingual",
+    "hinglish",
+    "hindi",
+    "express",
+    "postgresql",
+    "gemini"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.12.0"
+  }
+}
