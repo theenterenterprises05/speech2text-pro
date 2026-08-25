@@ -4,19 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Speech2Text Pro — Real-time Multilingual Transcription</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="dynamic-bg"></div>
+  
   <header class="topbar">
     <div class="brand">
-      <span class="logo">🎙️</span>
       <div>
-        <h1>Speech<span class="grad">2</span>Text <span class="pro">PRO</span></h1>
-        <p>Real-time multilingual transcription · English · हिन्दी · Hinglish</p>
+        <h1>Speech2Text<span class="pro">PRO</span></h1>
+        <p>Real-time Multilingual Transcription</p>
       </div>
     </div>
     <div class="stat-chips" id="statChips"></div>
-    <div class="status-pill" id="engineStatus">Engine: …</div>
+    <div class="status-pill" id="engineStatus">Initializing Engine...</div>
   </header>
 
   <main>
@@ -43,12 +47,14 @@
           TTS Voice
           <select id="voiceSelect"><option value="">Auto (script-aware)</option></select>
         </label>
-        <button id="micBtn" class="btn mic">🎤 Start Speaking</button>
-        <button id="aiBtn" class="btn ai">✨ AI Transcribe</button>
-        <button id="speakBtn" class="btn ghost">🔊 Listen</button>
-        <button id="copyBtn" class="btn ghost">📋 Copy</button>
-        <button id="saveBtn" class="btn primary" disabled>💾 Save</button>
-        <button id="clearBtn" class="btn ghost">🗑 Clear</button>
+        <div class="btn-group">
+          <button id="micBtn" class="btn mic">Start Speaking</button>
+          <button id="aiBtn" class="btn ai">AI Transcribe</button>
+          <button id="speakBtn" class="btn ghost">Listen</button>
+          <button id="copyBtn" class="btn ghost">Copy</button>
+          <button id="saveBtn" class="btn primary" disabled>Save</button>
+          <button id="clearBtn" class="btn ghost danger-text">Clear</button>
+        </div>
       </div>
 
       <div class="transcript-box">
@@ -62,7 +68,7 @@
       </div>
 
       <div class="live-footer">
-        <span class="hint">🛡️ Mic needs <b>HTTPS</b> (or localhost). Web Speech API runs in your browser — no audio leaves your device; the optional ✨ AI Transcribe sends a short recording to Gemini only if you set an API key.</span>
+        <span class="hint">Microphone requires HTTPS (or localhost). Web Speech API processes audio locally. Optional AI Transcribe utilizes Gemini (if configured).</span>
         <span class="lang-detect" id="langDetect"></span>
       </div>
     </section>
@@ -71,9 +77,9 @@
     <section class="card history">
       <div class="card-head">
         <h2>Transcription History <span class="count" id="countPill"></span></h2>
-        <div>
-          <button id="exportBtn" class="btn ghost">⬇ Export TXT</button>
-          <button id="refreshBtn" class="btn ghost">↻ Refresh</button>
+        <div class="btn-group">
+          <button id="exportBtn" class="btn ghost">Export TXT</button>
+          <button id="refreshBtn" class="btn ghost">Refresh</button>
         </div>
       </div>
 
@@ -92,7 +98,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Text</th><th>Lang</th><th>Words</th><th>Recorded</th><th class="actions-col">Actions</th></tr>
+            <tr><th>Text</th><th>Language</th><th>Words</th><th>Recorded</th><th class="actions-col">Actions</th></tr>
           </thead>
           <tbody id="historyBody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
         </table>
@@ -103,7 +109,7 @@
   <!-- Edit modal -->
   <div class="modal-backdrop hidden" id="modalBackdrop">
     <div class="modal">
-      <h3>✏️ Edit transcription</h3>
+      <h3>Edit transcription</h3>
       <textarea id="editText" rows="4" placeholder="Transcription text…"></textarea>
       <div class="modal-actions">
         <button class="btn ghost" id="cancelEditBtn">Cancel</button>
@@ -113,6 +119,6 @@
   </div>
 
   <div id="toast" class="toast hidden"></div>
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

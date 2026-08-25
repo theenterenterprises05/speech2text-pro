@@ -1,4 +1,4 @@
-'use strict';
+import { animate, spring, stagger } from "https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm";
 
 /* ============ Speech2Text Pro — frontend ============
  * STT  : Web Speech API (client-side, free, multilingual, real-time)
@@ -10,6 +10,7 @@
 const $ = (id) => document.getElementById(id);
 
 const els = {
+  dynamicBg: $('dynamic-bg'),
   engineStatus: $('engineStatus'),
   statChips: $('statChips'),
   liveBadge: $('liveBadge'),
@@ -154,24 +155,25 @@ function setSTT(on, aiMode = false) {
   state.recording = on;
   state.aiMode = aiMode;
   if (on) {
-    els.liveBadge.textContent = aiMode ? '● Recording for AI…' : '● Recording…';
+    els.dynamicBg.classList.add('active-recording');
+    els.liveBadge.textContent = aiMode ? 'Recording for AI...' : 'Recording...';
     els.liveBadge.className = 'badge recording';
-    els.micBtn.querySelector('span') || els.micBtn.setAttribute('data-t', '');
     if (aiMode) {
-      els.aiBtn.textContent = '⏹ Stop & Transcribe';
+      els.aiBtn.textContent = 'Stop & Transcribe';
       els.aiBtn.classList.add('recording');
       els.micBtn.disabled = true;
     } else {
-      els.micBtn.textContent = '⏹ Stop Speaking';
+      els.micBtn.textContent = 'Stop Speaking';
       els.micBtn.classList.add('recording');
       els.aiBtn.disabled = true;
     }
   } else {
+    els.dynamicBg.classList.remove('active-recording');
     els.liveBadge.textContent = 'Stopped';
     els.liveBadge.className = 'badge stopped';
-    els.micBtn.textContent = '🎤 Start Speaking';
+    els.micBtn.textContent = 'Start Speaking';
     els.micBtn.classList.remove('recording');
-    els.aiBtn.textContent = '✨ AI Transcribe';
+    els.aiBtn.textContent = 'AI Transcribe';
     els.aiBtn.classList.remove('recording');
     els.micBtn.disabled = false;
     els.aiBtn.disabled = false;
@@ -192,7 +194,7 @@ function stopSTT() {
 
 function toggleSTT() {
   if (!SpeechRecognition) {
-    toast('Browser Speech Recognition unsupported — use ✨ AI Transcribe (needs GEMINI_API_KEY) or Chrome/Edge.', 'error');
+    toast('Browser Speech Recognition unsupported — use AI Transcribe (needs GEMINI_API_KEY) or Chrome/Edge.', 'error');
     return;
   }
   if (state.recording) { stopSTT(); return; }
@@ -229,7 +231,7 @@ async function toggleAI() {
           });
           state.finalText = (state.finalText + ' ' + r.text).trim();
           renderLive();
-          toast('AI transcription complete ✅');
+          toast('AI transcription complete');
         } catch (e) { toast(e.message, 'error'); }
       };
       reader.readAsDataURL(blob);
@@ -267,16 +269,21 @@ function drawWave() {
   wfRAF = requestAnimationFrame(drawWave);
   const w = wf.width, h = wf.height;
   wfCtx.clearRect(0, 0, w, h);
-  if (!state.recording) { wfCtx.fillStyle = 'rgba(147,160,196,0.35)'; wfCtx.fillRect(0, h / 2 - 1, w, 2); return; }
+  if (!state.recording) { wfCtx.fillStyle = 'rgba(255,255,255,0.1)'; wfCtx.fillRect(0, h / 2 - 1, w, 2); return; }
   const bins = 96;
   let data = null;
   if (state.analyser) {
     data = new Uint8Array(state.analyser.frequencyBinCount);
     state.analyser.getByteFrequencyData(data);
   }
+  
+  // Sleek solid white/grey gradient instead of purple/cyan
   const grad = wfCtx.createLinearGradient(0, 0, w, 0);
-  grad.addColorStop(0, '#6366f1'); grad.addColorStop(0.5, '#a855f7'); grad.addColorStop(1, '#22d3ee');
+  grad.addColorStop(0, 'rgba(255,255,255,0.4)'); 
+  grad.addColorStop(0.5, 'rgba(255,255,255,0.9)'); 
+  grad.addColorStop(1, 'rgba(255,255,255,0.4)');
   wfCtx.fillStyle = grad;
+  
   const bw = w / bins;
   for (let i = 0; i < bins; i++) {
     let v;
@@ -341,7 +348,7 @@ async function saveCurrent() {
         duration_ms: state.recStart ? Math.max(0, Date.now() - state.recStart) : 0,
       }),
     });
-    toast(`Saved #${row.id} ✅ (${langLabel(row.language)})`);
+    toast(`Saved #${row.id} (${langLabel(row.language)})`);
     loadList();
     loadStats();
   } catch (e) { toast(e.message, 'error'); }
@@ -351,7 +358,7 @@ function copyLive() {
   const text = (state.finalText + ' ' + state.interimText).trim();
   if (!text) { toast('Nothing to copy.', 'error'); return; }
   navigator.clipboard?.writeText(text).then(
-    () => toast('Copied to clipboard 📋'),
+    () => toast('Copied to clipboard'),
     () => toast('Copy failed — select manually.', 'error')
   );
 }
@@ -361,14 +368,17 @@ async function loadStats() {
   try {
     const s = await api('/api/stats');
     const chips = [
-      `<span class="chip">📄 <b>${s.total}</b> saved</span>`,
-      `<span class="chip">🔤 <b>${s.words}</b> words</span>`,
-      `<span class="chip">📅 <b>${s.today}</b> today</span>`,
+      `<span class="chip">Saved: <b>${s.total}</b></span>`,
+      `<span class="chip">Words: <b>${s.words}</b></span>`,
+      `<span class="chip">Today: <b>${s.today}</b></span>`,
     ];
     for (const [lang, n] of Object.entries(s.byLanguage || {})) {
       chips.push(`<span class="chip lang-${lang}">${langLabel(lang)} <b>${n}</b></span>`);
     }
     els.statChips.innerHTML = chips.join('');
+    
+    // Animate chips in
+    animate(".chip", { opacity: [0, 1], y: [10, 0] }, { delay: stagger(0.05), duration: 0.4 });
   } catch { /* non-fatal */ }
 }
 
@@ -389,11 +399,14 @@ function renderRows(rows) {
   els.historyBody.innerHTML = '';
   if (!rows.length) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="5" class="empty">No transcriptions match — record something and press <b>Save</b>. 🎙️</td>`;
+    tr.innerHTML = `<td colspan="5" class="empty">No transcriptions match — record something and press <b>Save</b>.</td>`;
     els.historyBody.appendChild(tr);
     return;
   }
   rows.forEach((t) => els.historyBody.appendChild(buildRow(t)));
+  
+  // Staggered animation for table rows using Motion
+  animate("tbody tr", { opacity: [0, 1], x: [-10, 0] }, { delay: stagger(0.03), duration: 0.4 });
 }
 
 function buildRow(t) {
@@ -425,14 +438,17 @@ function buildRow(t) {
   const div = document.createElement('div');
   div.className = 'row-actions';
   div.append(
-    iconBtn('🔊', () => speak(t.text), 'Listen (TTS)'),
-    iconBtn('✏️', () => openEdit(t), 'Edit'),
-    iconBtn('🗑', async () => {
+    iconBtn('Play', () => speak(t.text), 'Listen (TTS)'),
+    iconBtn('Edit', () => openEdit(t), 'Edit'),
+    iconBtn('Del', async () => {
       if (!confirm(`Delete transcription #${t.id}?`)) return;
       try {
         await api(`/api/transcriptions/${t.id}`, { method: 'DELETE' });
         toast(`Deleted #${t.id}`);
-        loadList(); loadStats();
+        // Fade out animation before removing
+        animate(tr, { opacity: 0, height: 0 }, { duration: 0.3 }).finished.then(() => {
+          loadList(); loadStats();
+        });
       } catch (e) { toast(e.message, 'error'); }
     }, 'Delete', true)
   );
@@ -456,11 +472,16 @@ function openEdit(t) {
   state.editingId = t.id;
   els.editText.value = t.text;
   els.modalBackdrop.classList.remove('hidden');
+  animate(els.modalBackdrop, { opacity: [0, 1] }, { duration: 0.2 });
+  animate(".modal", { scale: [0.95, 1], opacity: [0, 1], y: [10, 0] }, { duration: 0.3, easing: spring() });
   els.editText.focus();
 }
 function closeEdit() {
   state.editingId = null;
-  els.modalBackdrop.classList.add('hidden');
+  animate(".modal", { scale: 0.95, opacity: 0, y: 10 }, { duration: 0.2 });
+  animate(els.modalBackdrop, { opacity: 0 }, { duration: 0.2 }).finished.then(() => {
+    els.modalBackdrop.classList.add('hidden');
+  });
 }
 async function saveEdit() {
   if (!state.editingId) return;
@@ -471,7 +492,7 @@ async function saveEdit() {
       method: 'PUT',
       body: JSON.stringify({ text, language: clientScriptGuess(text) }),
     });
-    toast('Updated ✅');
+    toast('Updated');
     closeEdit();
     loadList(); loadStats();
   } catch (e) { toast(e.message, 'error'); }
@@ -525,15 +546,19 @@ window.addEventListener('beforeunload', stopSTT);
 
 /* ---------------- init ---------------- */
 (async function init() {
-  if (SpeechRecognition) els.engineStatus.textContent = 'Engine: Web Speech · browser STT';
-  else els.engineStatus.textContent = 'Engine: browser STT unsupported';
+  if (SpeechRecognition) els.engineStatus.textContent = 'Engine: Web Speech';
+  else els.engineStatus.textContent = 'Engine: Unsupported';
   if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+
+  // Initial page load animations
+  animate(".topbar", { opacity: [0, 1], y: [-20, 0] }, { duration: 0.6, easing: spring() });
+  animate(".card", { opacity: [0, 1], y: [20, 0] }, { delay: stagger(0.1), duration: 0.6, easing: spring() });
 
   try {
     const h = await api('/api/health');
     state.health = h;
     state.geminiOn = !!h.gemini;
-    els.engineStatus.textContent = `Engine: ${h.db === 'postgres' ? 'PostgreSQL' : 'Dev (in-memory) DB'}${h.gemini ? ' · Gemini AI: on' : ''}`;
+    els.engineStatus.textContent = `Engine: ${h.db === 'postgres' ? 'Postgres' : 'Memory'}${h.gemini ? ' + Gemini' : ''}`;
   } catch { /* non-fatal */ }
 
   loadStats();
